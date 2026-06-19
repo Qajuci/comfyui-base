@@ -6,17 +6,29 @@ variable "TAG" {
 variable "COMFYUI_VERSION" {
   default = "v0.18.2"
 }
+# MANAGER_SHA: 66108ccdbc8c -> 2e93040db50ea96e7655e90c1ddbadcfa9a67811 (CHANGED)
 variable "MANAGER_SHA" {
-  default = "66108ccdbc8c"
+  default = "2e93040db50ea96e7655e90c1ddbadcfa9a67811"
 }
+# KJNODES_SHA: 4e1458c2417d -> 7f43f2ce910a27971bdbbf3fb5a52081457f32e2 (CHANGED)
 variable "KJNODES_SHA" {
-  default = "4e1458c2417d"
+  default = "7f43f2ce910a27971bdbbf3fb5a52081457f32e2"
 }
+# CIVICOMFY_SHA: 555e984bbcb0 -> 555e984bbcb02fc955075cb8eb699a6884c51239 (CHANGED)
 variable "CIVICOMFY_SHA" {
-  default = "555e984bbcb0"
+  default = "555e984bbcb02fc955075cb8eb699a6884c51239"
 }
+# RUNPODDIRECT_SHA: 8be7b2206b75 -> 8be7b2206b75b896331cb2afaf1f670e4ebeec1a (CHANGED)
 variable "RUNPODDIRECT_SHA" {
-  default = "8be7b2206b75"
+  default = "8be7b2206b75b896331cb2afaf1f670e4ebeec1a"
+}
+# GGUF_SHA: 6ea2651e7df66d7585f6ffee804b20e92fb38b8a (unchanged)
+variable "GGUF_SHA" {
+  default = "6ea2651e7df66d7585f6ffee804b20e92fb38b8a"
+}
+# IMPACTPACK_SHA: 429d0159ad429e64d2b3916e6e7be9c22d025c3c (unchanged)
+variable "IMPACTPACK_SHA" {
+  default = "429d0159ad429e64d2b3916e6e7be9c22d025c3c"
 }
 # Regular image (cu128)
 variable "TORCH_VERSION" {
@@ -60,6 +72,8 @@ target "common" {
     KJNODES_SHA         = KJNODES_SHA
     CIVICOMFY_SHA       = CIVICOMFY_SHA
     RUNPODDIRECT_SHA    = RUNPODDIRECT_SHA
+    GGUF_SHA            = GGUF_SHA
+    IMPACTPACK_SHA      = IMPACTPACK_SHA
     TORCH_VERSION       = TORCH_VERSION
     TORCHVISION_VERSION = TORCHVISION_VERSION
     TORCHAUDIO_VERSION  = TORCHAUDIO_VERSION

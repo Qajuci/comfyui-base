@@ -11,6 +11,8 @@ ARG MANAGER_SHA
 ARG KJNODES_SHA
 ARG CIVICOMFY_SHA
 ARG RUNPODDIRECT_SHA
+ARG GGUF_SHA
+ARG IMPACTPACK_SHA
 ARG TORCH_VERSION
 ARG TORCHVISION_VERSION
 ARG TORCHAUDIO_VERSION
@@ -62,7 +64,11 @@ RUN curl -fSL "https://github.com/ltdrdata/ComfyUI-Manager/archive/${MANAGER_SHA
     curl -fSL "https://github.com/MoonGoblinDev/Civicomfy/archive/${CIVICOMFY_SHA}.tar.gz" -o civicomfy.tar.gz && \
     mkdir -p Civicomfy && tar xzf civicomfy.tar.gz --strip-components=1 -C Civicomfy && rm civicomfy.tar.gz && \
     curl -fSL "https://github.com/MadiatorLabs/ComfyUI-RunpodDirect/archive/${RUNPODDIRECT_SHA}.tar.gz" -o runpoddirect.tar.gz && \
-    mkdir -p ComfyUI-RunpodDirect && tar xzf runpoddirect.tar.gz --strip-components=1 -C ComfyUI-RunpodDirect && rm runpoddirect.tar.gz
+    mkdir -p ComfyUI-RunpodDirect && tar xzf runpoddirect.tar.gz --strip-components=1 -C ComfyUI-RunpodDirect && rm runpoddirect.tar.gz && \
+    curl -fSL "https://github.com/city96/ComfyUI-GGUF/archive/${GGUF_SHA}.tar.gz" -o gguf.tar.gz && \
+    mkdir -p ComfyUI-GGUF && tar xzf gguf.tar.gz --strip-components=1 -C ComfyUI-GGUF && rm gguf.tar.gz && \
+    curl -fSL "https://github.com/ltdrdata/ComfyUI-Impact-Pack/archive/${IMPACTPACK_SHA}.tar.gz" -o impactpack.tar.gz && \
+    mkdir -p ComfyUI-Impact-Pack && tar xzf impactpack.tar.gz --strip-components=1 -C ComfyUI-Impact-Pack && rm impactpack.tar.gz
 
 # Init git repos with upstream remotes so ComfyUI-Manager can detect versions
 # and users can update via Manager at their own risk
@@ -80,14 +86,21 @@ RUN cd /tmp/build/ComfyUI && \
     git remote add origin https://github.com/MoonGoblinDev/Civicomfy.git && \
     cd /tmp/build/ComfyUI/custom_nodes/ComfyUI-RunpodDirect && \
     git init && git add -A && git -c user.name=- -c user.email=- commit -q -m "ComfyUI-RunpodDirect ${RUNPODDIRECT_SHA}" && \
-    git remote add origin https://github.com/MadiatorLabs/ComfyUI-RunpodDirect.git
+    git remote add origin https://github.com/MadiatorLabs/ComfyUI-RunpodDirect.git &&\
+    cd /tmp/build/ComfyUI/custom_nodes/ComfyUI-GGUF && \
+    git init && git add -A && git -c user.name=- -c user.email=- commit -q -m "ComfyUI-GGUF ${GGUF_SHA}" && \
+    git remote add origin https://github.com/city96/ComfyUI-GGUF.git && \
+    cd /tmp/build/ComfyUI/custom_nodes/ComfyUI-Impact-Pack && \
+    git init && git add -A && git -c user.name=- -c user.email=- commit -q -m "ComfyUI-Impact-Pack ${IMPACTPACK_SHA}" && \
+    git remote add origin https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
 
 # Generate lock file from all requirements (including torch pins), then install with hash verification
 WORKDIR /tmp/build
 RUN cat ComfyUI/requirements.txt > requirements.in && \
     for node_dir in ComfyUI/custom_nodes/*/; do \
         if [ -f "$node_dir/requirements.txt" ]; then \
-            cat "$node_dir/requirements.txt" >> requirements.in; \
+            grep -v "git+https://github.com/facebookresearch/sam2" \
+                "$node_dir/requirements.txt" >> requirements.in; \
         fi; \
     done && \
     echo "GitPython" >> requirements.in && \
@@ -107,7 +120,8 @@ RUN cat ComfyUI/requirements.txt > requirements.in && \
     python3.12 -m pip install --no-cache-dir --ignore-installed --require-hashes \
     --index-url https://pypi.org/simple \
     --extra-index-url "${TORCH_INDEX_URL}" \
-    -r requirements.lock
+    -r requirements.lock && \
+    python3.12 -m pip install git+https://github.com/facebookresearch/sam2
 
 # Pre-populate ComfyUI-Manager cache so first cold start skips the slow registry fetch
 COPY scripts/prebake-manager-cache.py /tmp/prebake-manager-cache.py
